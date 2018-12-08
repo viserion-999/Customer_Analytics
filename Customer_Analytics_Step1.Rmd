@@ -1,0 +1,93 @@
+---
+title: "Customer_Analytics_Step1"
+author: "Anagha Karanam"
+date: "12/8/2018"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache= TRUE)
+```
+
+## *Segmentation on Customer Feedback on their flight experience.*
+
+> _Moment of truth_: IT IS REALLY DIFFICULT TO FIND A DATASET OF YOUR DREAMS!
+
+The series of articles are a step by step guide (with findings & learnings, also with lots of issues & resolutions encountered) on SEGMENTATION based on customer feedback of their flight experiences.
+
+Here is the dataset I used: https://www.kaggle.com/johndddddd/customer-satisfaction
+
+###loading the data & reading it.
+```{r}
+if (!require("openxlsx")) install.packages("openxlsx")
+library("openxlsx")
+
+cs_data <- read.xlsx("customer-satisfaction/satisfaction.xlsx", sheet = 1, colNames = TRUE,rowNames = FALSE, skipEmptyRows = TRUE,
+          skipEmptyCols = TRUE, na.strings = NA,fillMergedCells = FALSE)
+
+```
+> _Moment of truth_: str() function? summary() function? OPEN THE EXCEL SHEET & SCROLL TO SEE THE TRUTH ABOUT DATA. Once you do so, trust what str says.
+
+###summary
+```{r}
+str(cs_data)
+```
+###summary
+```{r}
+summary(cs_data)
+```
+
+###Columns & their summary.
+```{r}
+colnames(cs_data)
+```
+
+1. "id" - Unique Customer id"
+2. "satisfaction_v2" - satisfied, neutral/disatisfied
+3. "Gender" - Female, Male
+4. "Customer.Type" - Loyal Customer, disloyal Customer
+5. "Age" - continous numbers.
+6. "Type.of.Travel"- Personal Travel, Business Travel
+7. "Class"-Eco, Eco plus, Business
+8. "Flight.Distance" - Flight Distance
+9. "Seat.comfort"- scale of 1 to 5
+10. "Departure/Arrival.time.convenient"-  scale of 1 to 5
+11. "Food.and.drink"-  scale of 1 to 5
+12. "Gate.location"  - scale of 1 to 5
+13. "Inflight.wifi.service"-  scale of 1 to 5
+14. "Inflight.entertainment"-  scale of 1 to 5
+15. "Online.support"-  scale of 1 to 5
+16. "Ease.of.Online.booking"-  scale of 1 to 5
+17. "On-board.service" - scale of 1 to 5
+18. "Leg.room.service" -  scale of 1 to 5
+19. "Baggage.handling"-  scale of 1 to 5
+20. "Checkin.service" -  scale of 1 to 5
+21. "Cleanliness"-  scale of 1 to 5
+22. "Online.boarding" -  scale of 1 to 5
+23. "Departure.Delay.in.Minutes" - minutes
+24. "Arrival.Delay.in.Minutes" - minutes
+
+
+The best way to view feedback data is to convert it into factors.
+##Converting scales to factor variables.
+
+```{r}
+
+cols_to_factor1 <- c("satisfaction_v2", "Gender", "Customer.Type", "Type.of.Travel","Class")
+cs_data$satisfaction_v2 <- as.factor(cs_data$satisfaction_v2)
+cs_data[cols_to_factor1] <- lapply(cs_data[cols_to_factor1], as.factor) 
+cols_to_factor2 <- c("Seat.comfort","Departure/Arrival.time.convenient","Food.and.drink","Inflight.wifi.service","Inflight.entertainment","Online.support","Ease.of.Online.booking","Gate.location","On-board.service","Leg.room.service","Baggage.handling","Checkin.service","Cleanliness","Online.boarding")
+cs_data[cols_to_factor2] <- lapply(cs_data[cols_to_factor2], as.factor)
+
+```
+
+##Summary after factoring the variables.
+```{r}
+str(cs_data)
+
+```
+
+### Yet to do - checking missing values, plotting the data to question the results. Followed by Segmentation & applying segmentation

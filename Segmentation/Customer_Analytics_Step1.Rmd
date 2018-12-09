@@ -1,0 +1,133 @@
+---
+title: "Customer_Analytics_Step1"
+author: "Anagha Karanam"
+date: "12/8/2018"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache= TRUE)
+```
+
+## *Segmentation on Customer Feedback on their flight experience.*
+
+> _Moment of truth_: IT IS REALLY DIFFICULT TO FIND A DATASET OF YOUR DREAMS!
+
+The series of articles are a step by step guide (with findings & learnings, also with lots of issues & resolutions encountered) on SEGMENTATION based on customer feedback of their flight experiences.
+
+Here is the dataset I used: https://www.kaggle.com/johndddddd/customer-satisfaction
+
+###loading the data & reading it.
+```{r}
+if (!require("openxlsx")) install.packages("openxlsx")
+library("openxlsx")
+
+cs_data <- read.xlsx("customer-satisfaction/satisfaction.xlsx", sheet = 1, colNames = TRUE,rowNames = FALSE, skipEmptyRows = TRUE,
+          skipEmptyCols = TRUE, na.strings = NA,fillMergedCells = FALSE)
+
+```
+> _Moment of truth_: str() function? summary() function? OPEN THE EXCEL SHEET & SCROLL TO SEE THE TRUTH ABOUT DATA. Once you do so, trust what str says.
+
+###summary
+```{r}
+str(cs_data)
+```
+###summary
+```{r}
+summary(cs_data)
+```
+
+###Columns & their summary.
+```{r}
+colnames(cs_data)
+```
+
+1. "id" - Unique Customer id"
+2. "satisfaction_v2" - satisfied, neutral/disatisfied
+3. "Gender" - Female, Male
+4. "Customer.Type" - Loyal Customer, disloyal Customer
+5. "Age" - continous numbers.
+6. "Type.of.Travel"- Personal Travel, Business Travel
+7. "Class"-Eco, Eco plus, Business
+8. "Flight.Distance" - Flight Distance
+9. "Seat.comfort"- scale of 0 to 5
+10. "Departure/Arrival.time.convenient"-  scale of 0 to 5
+11. "Food.and.drink"-  scale of 0 to 5
+12. "Gate.location"  - scale of 1 to 5
+13. "Inflight.wifi.service"-  scale of 0 to 5
+14. "Inflight.entertainment"-  scale of 0 to 5
+15. "Online.support"-  scale of 1 to 5
+16. "Ease.of.Online.booking"-  scale of 1 to 5
+17. "On-board.service" - scale of 1 to 5
+18. "Leg.room.service" -  scale of 0 to 5
+19. "Baggage.handling"-  scale of 1 to 5
+20. "Checkin.service" -  scale of 1 to 5
+21. "Cleanliness"-  scale of 1 to 5
+22. "Online.boarding" -  scale of 1 to 5
+23. "Departure.Delay.in.Minutes" - minutes
+24. "Arrival.Delay.in.Minutes" - minutes
+
+
+The best way to view feedback data is to convert it into factors.
+##Converting scales to factor variables.
+
+```{r}
+
+cols_to_factor1 <- c("satisfaction_v2", "Gender", "Customer.Type", "Type.of.Travel","Class")
+cs_data$satisfaction_v2 <- as.factor(cs_data$satisfaction_v2)
+cs_data[cols_to_factor1] <- lapply(cs_data[cols_to_factor1], as.factor) 
+cols_to_factor2 <- c("Seat.comfort","Departure/Arrival.time.convenient","Food.and.drink","Inflight.wifi.service","Inflight.entertainment","Online.support","Ease.of.Online.booking","Gate.location","On-board.service","Leg.room.service","Baggage.handling","Checkin.service","Cleanliness","Online.boarding")
+cs_data[cols_to_factor2] <- lapply(cs_data[cols_to_factor2], as.factor)
+
+```
+
+##Summary after factoring the variables.
+```{r}
+str(cs_data)
+
+```
+
+##Segmentation
+Imagine you are the manager trying to understand why the sales of your airlines are declining despite the feedback being good.
+
+Suppose you are observing the following plots:
+These plots are for feedback about flight experience for customers.
+
+![Customer In flight experience](/Users/anaghakaranam/Desktop/Customer_Analytics/customer-satisfaction/Customer_feedback.png)
+
+
+Here when we plot the responses against age of customers we see that more than 50% of the responses for all ages are greater or equal to 3.
+
+>We call it out as average response and report positive.
+
+But as we all know, 
+>Average is one of the biggest enemy of analysts!!
+
+In the below graph, the number of people who gave 5 stars for seat comfort is highest for people who travelled by business class! But we thought seat comfort was good irrespective of the class as per the above graph.
+
+![Customer In flight experience](/Users/anaghakaranam/Desktop/Customer_Analytics/customer-satisfaction/Rplot.png)
+
+This is where segmentation comes into picture.
+
+>Segmentation:Segmentation is a process of breaking a group of entities (Parent group) into multiple groups of entities (Child group) so that entities in child group have higher homogeneity with in its entities.
+
+Usally segmentation is used for deciding the right group to sell the product. However, it is also used in scenarios like above. 
+
+How to create a segmentation:
+-Step 1: Define the purpose of the segmentation. How do you want to use this segmentation? Is it for new customer acquisition? Managing a portfolio of existing customers? or Reducing credit exposure to reduce charge-offs? Every segmentation is created for a purpose. Until this purpose is clear, you will not be able to create a good segmentation.
+
+-Step 2: Identify the most critical parameters (variables) which influence the purpose of the segmentation. List them in order of their importance. Now, there are multiple statistical techniques like Clustering, Decision tree which help you do this. If you don’t know these, use your business knowledge and understanding to come out with the list. For example, if you want to create a segmentation of products and focus on products which are most profitable, most critical parameters would be Cost and Revenue. If the problem is related to identifying best talent, the variables would be skill and motivation.
+
+-Step 3: Once these variables are identified, you need to identify the granularity and threshold for creating segments. Again, these can come from the technique developed, but business knowledge could be deployed equally well. As a general guidance, you should have 2 – 3 levels for each important variable identified. However, it depends on complexity of problem, ability of your systems and openness of your business to adapt a segmentation. Some of the simple ways to decide threshold could be:
+1. High / Medium / Low with numerical thresholds
+2. 0 / 1 for binary output
+3. Vintage / Age of customers
+
+-Step 4: Assign customers to each of the cells and see if there is a fair distribution. If not, tweak the thresholds or variables. Perform step 2, 3 and 4 iteratively till you create a fair distribution.
+
+-Step 5: Include this segmentation in your analysis and analyze at segment level (and not at macro level!)
+
+Above steps taken from this link: https://www.analyticsvidhya.com/blog/2013/08/importance-segmentation-create/
